@@ -6,6 +6,8 @@ use Monolog\Handler\AbstractProcessingHandler;
 
 use LLS\Bundle\MonologExtraBundle\Handler;
 
+use Monolog\Logger;
+
 class SQSHandler extends test
 {
     public function testClass()
@@ -34,22 +36,19 @@ class SQSHandler extends test
 
     public function testInstanciate()
     {
-        $handler = new Handler\SQSHandler($queue = $this->getQueueInterfaceMock(), 'critical', false);
-
         $this
-            ->assert
+            ->given($queue = $this->getQueueInterfaceMock())
+            ->and($handler = new Handler\SQSHandler($queue, 'critical', false))
+            ->then
                 ->object($handler->getQueue())
                     ->isIdenticalTo($queue)
                 ->integer($handler->getLevel())
                     ->isEqualTo(\Monolog\Logger::CRITICAL)
                 ->boolean($handler->getBubble())
                     ->isFalse()
-        ;
-
-        $handler = new Handler\SQSHandler($queue = $this->getQueueInterfaceMock(), 25, false);
-
-        $this
-            ->assert
+            ->given($queue = $this->getQueueInterfaceMock())
+            ->and($handler = new Handler\SQSHandler($queue, 25, false))
+            ->then
                 ->object($handler->getQueue())
                     ->isIdenticalTo($queue)
                 ->integer($handler->getLevel())
@@ -59,17 +58,16 @@ class SQSHandler extends test
         ;
     }
 
-    public function testWrite()
+    public function testHandle()
     {
-        $handler = new Handler\SQSHandler($queue = $this->getQueueInterfaceMock());
-
-        $handler->write(array("formated" => "My log message for SQS"));
-
         $this
-            ->assert
+            ->given($queue = $this->getQueueInterfaceMock())
+            ->and($handler = new Handler\SQSHandler($queue))
+            ->if($handler->handle(array("formated" => "My log message for SQS", "level" => Logger::INFO)) || true)
+            ->then
                 ->mock($queue->getMessageFactory())
                     ->call('create')
-                        ->withArguments("My log message for SQS")
+                        ->withArguments('{"formated":"My log message for SQS","level":200}')
                             ->once
                 ->mock($queue)
                     ->call('sendMessage')
@@ -79,6 +77,8 @@ class SQSHandler extends test
 
     public function getQueueInterfaceMock()
     {
+        $this->mockGenerator->orphanize('__construct');
+
         $mock = new \mock\LLS\Bundle\SQSBundle\Interfaces\QueueInterface();
 
         $mock->getMockController()->getMessageFactory = $this->getMessageFactoryInterfaceMock();
@@ -96,7 +96,7 @@ class SQSHandler extends test
         $mock    = new \mock\LLS\Bundle\SQSBundle\Interfaces\MessageFactoryInterface();
         $service = $this;
 
-        $mock->getMockController()->create = function ($body) use ($service) {
+        $mock->getMockController()->create = function ($body) use ($service, $mock) {
             $message = $service->getMessageInterfaceMock();
             $message->getMockController()->getBody          = $body;
             $message->getMockController()->setId            = $message;
