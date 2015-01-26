@@ -1,4 +1,2 @@
 parameters:
-    lls_monolog_extra.sqs_handler.class: LLS\Bundle\MonologExtraBundle\Monolog\Handler\SQSHandler
-
-services:
+    lls_monolog_extra.sqs_handler.class: LLS\Bundle\MonologExtraBundle\Handler\SQSHandler
