@@ -46,7 +46,7 @@ class LLSMonologExtraExtension extends ContainerBuilderTest
                 // Parameters
 
                 ->string($this->container->getParameter($this->root.'.sqs_handler.class'))
-                    ->isEqualTo('LLS\Bundle\MonologExtraBundle\Monolog\Handler\SQSHandler');
+                    ->isEqualTo('LLS\Bundle\MonologExtraBundle\Handler\SQSHandler');
     }
 
     public function testConfigCreateHandlers()
@@ -80,7 +80,7 @@ class LLSMonologExtraExtension extends ContainerBuilderTest
                     ->isTrue()
                 ->object($definition = $this->container->getDefinition($this->root.'.handlers.bar'))
                     ->string($definition->getClass())
-                        ->isEqualTo('LLS\Bundle\MonologExtraBundle\Monolog\Handler\SQSHandler')
+                        ->isEqualTo('LLS\Bundle\MonologExtraBundle\Handler\SQSHandler')
                     ->array($arguments = $definition->getArguments())
                             ->hasSize(3)
                         ->object($arguments[0])
@@ -94,7 +94,7 @@ class LLSMonologExtraExtension extends ContainerBuilderTest
                     ->isTrue()
                 ->object($definition = $this->container->getDefinition($this->root.'.handlers.foo'))
                     ->string($definition->getClass())
-                        ->isEqualTo('LLS\Bundle\MonologExtraBundle\Monolog\Handler\SQSHandler')
+                        ->isEqualTo('LLS\Bundle\MonologExtraBundle\Handler\SQSHandler')
                     ->array($arguments = $definition->getArguments())
                             ->hasSize(3)
                         ->object($arguments[0])
@@ -137,7 +137,7 @@ class LLSMonologExtraExtension extends ContainerBuilderTest
                     ->isTrue()
                 ->object($definition = $this->container->getDefinition($this->root.'.handlers.bar'))
                     ->string($definition->getClass())
-                        ->isEqualTo('LLS\Bundle\MonologExtraBundle\Monolog\Handler\SQSHandler')
+                        ->isEqualTo('LLS\Bundle\MonologExtraBundle\Handler\SQSHandler')
                     ->array($arguments = $definition->getArguments())
                             ->hasSize(3)
                         ->object($arguments[0])
