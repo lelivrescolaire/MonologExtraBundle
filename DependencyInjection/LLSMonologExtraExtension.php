@@ -59,7 +59,7 @@ class LLSMonologExtraExtension extends Extension
             $service     = $container->getDefinition($serviceName);
 
             if (!empty($handlers)) {
-                foreach($handlers as $handler) {
+                foreach ($handlers as $handler) {
                     $service->addTag('monolog.processor', array(
                         'method'  => 'processRecord',
                         'handler' => $handler
