@@ -46,7 +46,10 @@ class LLSMonologExtraExtension extends ContainerBuilderTest
                 // Parameters
 
                 ->string($this->container->getParameter($this->root.'.sqs_handler.class'))
-                    ->isEqualTo('LLS\Bundle\MonologExtraBundle\Handler\SQSHandler');
+                    ->isEqualTo('LLS\Bundle\MonologExtraBundle\Handler\SQSHandler')
+
+                ->string($this->container->getParameter($this->root.'.processors.ip.class'))
+                    ->isEqualTo('LLS\Bundle\MonologExtraBundle\Processor\IPRequestProcessor');
     }
 
     public function testConfigCreateHandlers()
@@ -103,6 +106,73 @@ class LLSMonologExtraExtension extends ContainerBuilderTest
                             ->isEqualTo('DEBUG')
                         ->boolean($arguments[2]) // Test default bubble value
                             ->isTrue();
+    }
+
+    public function testConfigCreateProcessorsWithHandlers()
+    {
+        $configs = array(
+            array(
+                "processors" => array(
+                    "ip" => array('bar', 'foo')
+                )
+            ),
+        );
+
+        $this->extension->load($configs, $this->container);
+
+        $this
+            ->assert
+                ->boolean($this->container->hasDefinition($this->root.'.processors.ip'))
+                    ->isTrue()
+                ->object($definition = $this->container->getDefinition($this->root.'.processors.ip'))
+                    ->string($definition->getClass())
+                        ->isEqualTo('%'.$this->root.'.processors.ip.class%')
+                    ->array($tags = $definition->getTag('monolog.processor'))
+                        ->hasSize(2)
+                        ->array($tags[0])
+                            ->isEqualTo(array('method' => 'processRecord', 'handler' => 'bar'))
+                        ->array($tags[1])
+                            ->isEqualTo(array('method' => 'processRecord', 'handler' => 'foo'));
+    }
+
+    public function testConfigCreateProcessorsWithoutHandlers()
+    {
+        $this->configCreateProcessorWithoutHandlers(array(
+            array(
+                "processors" => array(
+                    "ip" => array()
+                )
+            ),
+        ));
+    }
+
+    public function testConfigCreateProcessorsWithNullHandlers()
+    {
+        $this->configCreateProcessorWithoutHandlers(array(
+            array(
+                "processors" => array(
+                    "ip" => null
+                )
+            ),
+        ));
+    }
+
+    protected function configCreateProcessorWithoutHandlers($configs)
+    {
+
+        $this->extension->load($configs, $this->container);
+
+        $this
+            ->assert
+                ->boolean($this->container->hasDefinition($this->root.'.processors.ip'))
+                    ->isTrue()
+                ->object($definition = $this->container->getDefinition($this->root.'.processors.ip'))
+                    ->string($definition->getClass())
+                        ->isEqualTo('%'.$this->root.'.processors.ip.class%')
+                    ->array($tags = $definition->getTag('monolog.processor'))
+                        ->hasSize(1)
+                        ->array($tags[0])
+                            ->isEqualTo(array('method' => 'processRecord'));
     }
 
     public function testConfigOverridesServices()

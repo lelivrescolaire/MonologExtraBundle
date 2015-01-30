@@ -22,7 +22,9 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->fixXmlConfig('handler')
-            ->append($this->getHandlersNode());
+            ->append($this->getHandlersNode())
+            ->fixXmlConfig('processor')
+            ->append($this->getProcessorsNode());
 
         return $treeBuilder;
     }
@@ -61,6 +63,20 @@ class Configuration implements ConfigurationInterface
                         })
                         ->thenInvalid('SQS Handler requires a valid queue identifier.')
                     ->end()
+            ->end();
+
+        return $node;
+    }
+
+    protected function getProcessorsNode()
+    {
+        $treeBuilder = new TreeBuilder();
+
+        $node = $treeBuilder->root('processors');
+        $node
+            ->useAttributeAsKey('name')
+            ->prototype('array')
+                ->prototype('scalar')->end()
             ->end();
 
         return $node;

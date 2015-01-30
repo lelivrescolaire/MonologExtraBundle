@@ -32,17 +32,13 @@ class LLSMonologExtraExtension extends Extension
         if (!empty($config['handlers'])) {
             $this->loadHandlers($container, $config['handlers']);
         }
+
+        if (!empty($config['processors'])) {
+            $this->loadProcessors($container, $config['processors']);
+        }
     }
 
-    /**
-     * Load handlers from user configuration
-     *
-     * @param ContainerBuilder $container SF2 Container Builder
-     * @param array            $config    Configuration array
-     *
-     * @return {$this}
-     */
-    public function loadHandlers(ContainerBuilder $container, array $config)
+    protected function loadHandlers(ContainerBuilder $container, array $config)
     {
         foreach ($config as $name => $attributes) {
             switch ($attributes["type"])
@@ -50,6 +46,29 @@ class LLSMonologExtraExtension extends Extension
                 case 'sqs':
                     $this->loadSQSHandler($container, $name, $attributes);
                     break;
+            }
+        }
+
+        return $this;
+    }
+
+    protected function loadProcessors(ContainerBuilder $container, array $config)
+    {
+        foreach ($config as $processorName => $handlers) {
+            $serviceName = sprintf('lls_monolog_extra.processors.%s', $processorName);
+            $service     = $container->getDefinition($serviceName);
+
+            if (!empty($handlers)) {
+                foreach($handlers as $handler) {
+                    $service->addTag('monolog.processor', array(
+                        'method'  => 'processRecord',
+                        'handler' => $handler
+                    ));
+                }
+            } else {
+                $service->addTag('monolog.processor', array(
+                    'method'  => 'processRecord'
+                ));
             }
         }
 

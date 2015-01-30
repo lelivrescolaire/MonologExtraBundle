@@ -1,2 +1,9 @@
 parameters:
     lls_monolog_extra.sqs_handler.class: LLS\Bundle\MonologExtraBundle\Handler\SQSHandler
+    lls_monolog_extra.processors.ip.class: LLS\Bundle\MonologExtraBundle\Processor\IPRequestProcessor
+
+services:
+    lls_monolog_extra.processors.ip:
+        class: %lls_monolog_extra.processors.ip.class%
+        arguments:
+            - @request
