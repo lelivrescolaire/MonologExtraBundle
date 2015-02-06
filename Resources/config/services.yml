@@ -7,3 +7,5 @@ services:
         class: %lls_monolog_extra.processors.ip.class%
         arguments:
             - @request
+        public: true
+        scope: request
